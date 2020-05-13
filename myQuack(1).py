@@ -15,7 +15,11 @@ You are welcome to use the pandas library if you know it.
 '''
 
 
+<<<<<<< HEAD
 
+=======
+import numpy as np
+>>>>>>> callum-code
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -25,7 +29,11 @@ def my_team():
     of triplet of the form (student_number, first_name, last_name)
     
     '''
+<<<<<<< HEAD
 #    return [ (1234567, 'Ada', 'Lovelace'), (1234568, 'Grace', 'Hopper'), (1234569, 'Eva', 'Tardos') ]
+=======
+#    return [ (10263047, 'Declan', 'Kemp'), (10482652, 'Callum', 'McNeilage') ]
+>>>>>>> callum-code
     raise NotImplementedError()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -47,9 +55,32 @@ def prepare_dataset(dataset_path):
 
     @return
 	X,y
+<<<<<<< HEAD
     '''
     ##         "INSERT YOUR CODE HERE"    
     raise NotImplementedError()
+=======
+    '''    
+    # Create one-dimensional numpy array using class label of X[i,:]
+    X = np.genfromtxt(dataset_path, dtype ='U' ,delimiter=",")
+    y = X[:,1]
+    
+    for i in range(len(y)):
+        if y[i] == 'M':
+            y[i] = 1
+        else:
+            y[i] = 0
+            
+    y = np.asarray(y, dtype='i')
+    
+    # Create two-deimensional numpy array X
+    X = np.genfromtxt(dataset_path, dtype = 'f', delimiter=',')
+    
+    X = np.delete(X, 1, 1)
+    
+    return(X,y)
+
+>>>>>>> callum-code
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -126,13 +157,20 @@ def build_NeuralNetwork_classifier(X_training, y_training):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     pass
+=======
+>>>>>>> callum-code
     # Write a main part that calls the different 
     # functions to perform the required tasks and repeat your experiments.
     # Call your functions here
 
     ##         "INSERT YOUR CODE HERE"    
+<<<<<<< HEAD
     raise NotImplementedError()
+=======
+    print(prepare_dataset('./medical_records(1).data'))
+>>>>>>> callum-code
     
 
 
