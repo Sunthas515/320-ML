@@ -47,17 +47,25 @@ def prepare_dataset(dataset_path):
 
     @return
 	X,y
-    '''
+    '''    
+    # Create one-dimensional numpy array using class label of X[i,:]
+    X = np.genfromtxt(dataset_path, dtype ='U' ,delimiter=",")
+    y = X[:,1]
     
-    # Open file and save value as a string
-    file = open(dataset_path, 'r')   
-    file_str = file.read()
-
-    # Split string along data points
-    file_arr = file_str.split(',')
+    for i in range(len(y)):
+        if y[i] == 'M':
+            y[i] = 1
+        else:
+            y[i] = 0
+            
+    y = np.asarray(y, dtype='i')
     
     # Create two-deimensional numpy array X
-    X = np.arrange(file_arr.length).reshape(3)
+    X = np.genfromtxt(dataset_path, dtype = 'f', delimiter=',')
+    
+    X = np.delete(X, 1, 1)
+    
+    return(X,y)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -140,7 +148,7 @@ if __name__ == "__main__":
     # Call your functions here
 
     ##         "INSERT YOUR CODE HERE"    
-    prepare_dataset('./medical_records(1).data')
+    print(prepare_dataset('./medical_records(1).data'))
     
 
 
