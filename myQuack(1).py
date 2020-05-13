@@ -15,7 +15,7 @@ You are welcome to use the pandas library if you know it.
 '''
 
 
-
+import numpy as np
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -25,7 +25,7 @@ def my_team():
     of triplet of the form (student_number, first_name, last_name)
     
     '''
-#    return [ (1234567, 'Ada', 'Lovelace'), (1234568, 'Grace', 'Hopper'), (1234569, 'Eva', 'Tardos') ]
+#    return [ (10263047, 'Declan', 'Kemp'), (10482652, 'Callum', 'McNeilage') ]
     raise NotImplementedError()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -48,8 +48,17 @@ def prepare_dataset(dataset_path):
     @return
 	X,y
     '''
-    ##         "INSERT YOUR CODE HERE"    
-    raise NotImplementedError()
+    
+    # Open file and save value as a string
+    file = open(dataset_path, 'r')   
+    file_str = file.read()
+
+    # Split string along data points
+    file_arr = file_str.split(',')
+    
+    # Create two-deimensional numpy array X
+    X = np.arrange(file_arr.length).reshape(3)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -126,13 +135,12 @@ def build_NeuralNetwork_classifier(X_training, y_training):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 if __name__ == "__main__":
-    pass
     # Write a main part that calls the different 
     # functions to perform the required tasks and repeat your experiments.
     # Call your functions here
 
     ##         "INSERT YOUR CODE HERE"    
-    raise NotImplementedError()
+    prepare_dataset('./medical_records(1).data')
     
 
 
