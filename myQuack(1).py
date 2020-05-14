@@ -16,6 +16,9 @@ You are welcome to use the pandas library if you know it.
 
 
 import numpy as np
+from sklearn import naive_bayes, neighbors, svm
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.metrics import classification_report
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -25,9 +28,7 @@ def my_team():
     of triplet of the form (student_number, first_name, last_name)
     
     '''
-#    return [ (10263047, 'Declan', 'Kemp'), (10482652, 'Callum', 'McNeilage') ]
-    raise NotImplementedError()
-
+    return [ (10263047, 'Declan', 'Kemp'), (10482652, 'Callum', 'McNeilage') ]
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -82,8 +83,8 @@ def build_DecisionTree_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     ##         "INSERT YOUR CODE HERE"    
-    raise NotImplementedError()
-
+    return NotImplementedError()
+    
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def build_NearrestNeighbours_classifier(X_training, y_training):
@@ -98,7 +99,24 @@ def build_NearrestNeighbours_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     ##         "INSERT YOUR CODE HERE"    
-    raise NotImplementedError()
+    
+    # Create Classifier
+    classifier = neighbors.KNeighborsClassifier()
+    # Enter Parameters
+    params = [
+            {
+                    'n_neighbours': np.arange(20) + 1,
+                    'leaf_size': np.arange(50) + 1
+                    }
+            ]
+    
+    # Use gridSearch to estimate best value
+    clf = GridSearchCV(classifier, params)
+    
+    # Set up the Training data
+    clf.fit(X_training, y_training)
+    
+    return clf
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -114,7 +132,30 @@ def build_SupportVectorMachine_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     ##         "INSERT YOUR CODE HERE"    
-    raise NotImplementedError()
+    
+    # Create Classifier
+    classifier = svm.SVC()
+    
+    # Enter parameters
+    params = [
+            {
+                    'C': np.logspace(-3, 3, 7),
+                    'kernel': ['linear']
+                    },
+            {
+                    'C': np.logspace(-3, 3, 7),
+                    'gamma': np.logspace(-4, 4, 9),
+                    'kernel': ['rbf']
+                    }
+            ]
+    
+    # Use gridSearch to estimate best value
+    clf = GridSearchCV(classifier, params)
+    
+    #Set up the Training data
+    clf.fit(X_training, y_training)
+    
+    return clf
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -147,8 +188,31 @@ if __name__ == "__main__":
     # functions to perform the required tasks and repeat your experiments.
     # Call your functions here
 
-    ##         "INSERT YOUR CODE HERE"    
-    print(prepare_dataset('./medical_records(1).data'))
+    ##         "INSERT YOUR CODE HERE"  
     
-
-
+    #Print names
+    print(my_team())
+    
+    # Data pre-processing
+    X, y = prepare_dataset('./medical_records(1).data')
+    
+    #Create test data
+    X_trainer, X_tester, y_trainer, y_tester = train_test_split(X, y, test_size=0.3)
+    
+    #Create classifiers
+    classifiers = [[build_NearrestNeighbours_classifier, "Nearest Neighbours"],
+                   [build_SupportVectorMachine_classifier, "Support Vector Machine"]]
+    
+    #Output each classifier's values
+    for function, name in classifiers:
+        classifier = function(X_trainer, y_trainer)
+        #Print Outputs
+        print(name, "Best Parameters:", classifier.best_params_)
+        #Generate report for training data
+        predict_training = classifier.predict(X_trainer)
+        print(name, "Classification Report:")
+        print(classification_report(y_trainer, predict_training))
+        # Generate report for test data
+        predict = classifier.predict(X_tester)
+        print(name, "Test Data Classification Report:")
+        print(classification_report(y_tester, predict))
