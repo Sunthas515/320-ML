@@ -85,18 +85,7 @@ def build_DecisionTree_classifier(X_training, y_training):
     ##         "INSERT YOUR CODE HERE"    
     
     #Create Classifier
-    classifier = tree.DecisionTreeClassifier()
-    
-    #Enter Parameters
-    params = [
-            {
-                    'splitter': ['best', 'random'],
-                    'max_depth': np.linspace(1, 100, 100)
-                    }
-            ]
-    
-    #Use gridSearch to estimate best value
-    clf = GridSearchCV(classifier, params)
+    clf = tree.DecisionTreeClassifier()
     
     #Set up training data
     clf.fit(X_training, y_training)
@@ -118,18 +107,8 @@ def build_NearrestNeighbours_classifier(X_training, y_training):
     '''
     ##         "INSERT YOUR CODE HERE"    
     
-    # Create Classifier
-    classifier = neighbors.KNeighborsClassifier()
-    # Enter Parameters
-    params = [
-            {
-                    'n_neighbours': np.arange(20) + 1,
-                    'leaf_size': np.arange(50) + 1
-                    }
-            ]
-    
-    # Use gridSearch to estimate best value
-    clf = GridSearchCV(classifier, params)
+    # Create classifier
+    clf = neighbors.KNeighborsClassifier(algorithm='auto', n_neighbors=10)
     
     # Set up the Training data
     clf.fit(X_training, y_training)
@@ -152,23 +131,7 @@ def build_SupportVectorMachine_classifier(X_training, y_training):
     ##         "INSERT YOUR CODE HERE"    
     
     # Create Classifier
-    classifier = svm.SVC()
-    
-    # Enter parameters
-    params = [
-            {
-                    'C': np.logspace(-3, 3, 7),
-                    'kernel': ['linear']
-                    },
-            {
-                    'C': np.logspace(-3, 3, 7),
-                    'gamma': np.logspace(-4, 4, 9),
-                    'kernel': ['rbf']
-                    }
-            ]
-    
-    # Use gridSearch to estimate best value
-    clf = GridSearchCV(classifier, params)
+    clf = svm.SVC()
     
     #Set up the Training data
     clf.fit(X_training, y_training)
@@ -225,8 +188,6 @@ if __name__ == "__main__":
     #Output each classifier's values
     for function, name in classifiers:
         classifier = function(X_trainer, y_trainer)
-        #Print Outputs
-        print(name, "Best Parameters:", classifier.best_params_)
         #Generate report for training data
         predict_training = classifier.predict(X_trainer)
         print(name, "Classification Report:")
