@@ -16,7 +16,7 @@ You are welcome to use the pandas library if you know it.
 
 
 import numpy as np
-from sklearn import naive_bayes, neighbors, svm
+from sklearn import tree, neighbors, svm
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import classification_report
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -83,7 +83,25 @@ def build_DecisionTree_classifier(X_training, y_training):
 	clf : the classifier built in this function
     '''
     ##         "INSERT YOUR CODE HERE"    
-    return NotImplementedError()
+    
+    #Create Classifier
+    classifier = tree.DecisionTreeClassifier()
+    
+    #Enter Parameters
+    params = [
+            {
+                    'splitter': ['best', 'random'],
+                    'max_depth': np.linspace(1, 100, 100)
+                    }
+            ]
+    
+    #Use gridSearch to estimate best value
+    clf = GridSearchCV(classifier, params)
+    
+    #Set up training data
+    clf.fit(X_training, y_training)
+    
+    return clf
     
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -200,7 +218,8 @@ if __name__ == "__main__":
     X_trainer, X_tester, y_trainer, y_tester = train_test_split(X, y, test_size=0.3)
     
     #Create classifiers
-    classifiers = [[build_NearrestNeighbours_classifier, "Nearest Neighbours"],
+    classifiers = [[build_DecisionTree_classifier, "Decision Tree"],
+                   [build_NearrestNeighbours_classifier, "Nearest Neighbours"],
                    [build_SupportVectorMachine_classifier, "Support Vector Machine"]]
     
     #Output each classifier's values
