@@ -14,7 +14,9 @@ You are welcome to use the pandas library if you know it.
 
 '''
 import numpy as np
+#import tensorflow as tf
 
+from tensorflow import keras
 from sklearn import tree, neighbors, svm
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import classification_report
@@ -84,9 +86,11 @@ def build_DecisionTree_classifier(X_training, y_training):
     ##         "INSERT YOUR CODE HERE"    
     
     #Create Classifier
-    clf = tree.DecisionTreeClassifier()
+    base_clf = tree.DecisionTreeClassifier()
+    params = {'min_samples_leaf' : list(range(1,10))}
+    clf = GridSearchCV(base_clf, params, cv=5)
     
-    #Set up training data
+     #Set up training data
     clf.fit(X_training, y_training)
     
     return clf
@@ -107,8 +111,9 @@ def build_NearrestNeighbours_classifier(X_training, y_training):
     ##         "INSERT YOUR CODE HERE"    
     
     # Create classifier
-    clf = neighbors.KNeighborsClassifier(algorithm='auto', n_neighbors=10)
-    
+    base_clf = neighbors.KNeighborsClassifier()
+    params = {'n_neighbors' : list(range(1,10,2))}
+    clf = GridSearchCV(base_clf, params, cv=5)
     # Set up the Training data
     clf.fit(X_training, y_training)
     
@@ -130,8 +135,9 @@ def build_SupportVectorMachine_classifier(X_training, y_training):
     ##         "INSERT YOUR CODE HERE"    
     
     # Create Classifier
-    clf = svm.SVC()
-    
+    base_clf = svm.SVC(gamma='auto')
+    params = {'C' : [10, 1, 0.1, 0.01, 0.001]}
+    clf = GridSearchCV(base_clf, params, cv=5)
     #Set up the Training data
     clf.fit(X_training, y_training)
     
@@ -152,8 +158,11 @@ def build_NeuralNetwork_classifier(X_training, y_training):
     @return
 	clf : the classifier built in this function
     '''
-    ##         "INSERT YOUR CODE HERE"    
-    raise NotImplementedError()
+   
+    clf = keras.Sequential()
+    clf.add(keras.layers.Dense(8))
+    clf.compile()
+    clf.fit(X_training, y_training)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -193,3 +202,6 @@ if __name__ == "__main__":
         predict = classifier.predict(X_tester)
         print(name, "Test Data Classification Report:")
         print(classification_report(y_tester, predict))
+        
+    nnclf = build_NeuralNetwork_classifier(X_trainer, y_trainer)
+    
