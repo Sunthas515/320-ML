@@ -14,12 +14,16 @@ You are welcome to use the pandas library if you know it.
 
 '''
 import numpy as np
-#import tensorflow as tf
+import pandas
+import warnings
 
-from tensorflow import keras
 from sklearn import tree, neighbors, svm
+from sklearn.neural_network import MLPClassifier
+
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import classification_report
+from sklearn.exceptions import ConvergenceWarning
+from sklearn.preprocessing import StandardScaler
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -49,26 +53,12 @@ def prepare_dataset(dataset_path):
 
     @return
 	X,y
-    '''    
-    # Create one-dimensional numpy array using class label of X[i,:]
-    X = np.genfromtxt(dataset_path, dtype ='U' ,delimiter=",")
-    y = X[:,1]
+    '''
+    source = np.array(pandas.read_csv(dataset_path, header = None))
+    X = source[:, 2:].astype(np.float32)
+    y = np.array([1 if c == 'M' else 0 for c in source[:, 1]])
     
-    for i in range(len(y)):
-        if y[i] == 'M':
-            y[i] = 1
-        else:
-            y[i] = 0
-            
-    y = np.asarray(y, dtype='i')
-    
-    # Create two-deimensional numpy array X
-    X = np.genfromtxt(dataset_path, dtype = 'f', delimiter=',')
-    
-    X = np.delete(X, 1, 1)
-    
-    return(X,y)
-
+    return X, y
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -83,17 +73,15 @@ def build_DecisionTree_classifier(X_training, y_training):
     @return
 	clf : the classifier built in this function
     '''
-    ##         "INSERT YOUR CODE HERE"    
-    
     #Create Classifier
     base_clf = tree.DecisionTreeClassifier()
     params = {'min_samples_leaf' : list(range(1,10))}
-    clf = GridSearchCV(base_clf, params, cv=5)
+    clf = GridSearchCV(base_clf, params, cv=5, iid=False)
     
      #Set up training data
     clf.fit(X_training, y_training)
     
-    return clf
+    return clf.best_estimator_
     
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -108,16 +96,14 @@ def build_NearrestNeighbours_classifier(X_training, y_training):
     @return
 	clf : the classifier built in this function
     '''
-    ##         "INSERT YOUR CODE HERE"    
-    
     # Create classifier
     base_clf = neighbors.KNeighborsClassifier()
-    params = {'n_neighbors' : list(range(1,10,2))}
-    clf = GridSearchCV(base_clf, params, cv=5)
+    params = {'n_neighbors' : list(range(1,20,2))}
+    clf = GridSearchCV(base_clf, params, cv=5, iid=False)
     # Set up the Training data
     clf.fit(X_training, y_training)
     
-    return clf
+    return clf.best_estimator_
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -132,16 +118,14 @@ def build_SupportVectorMachine_classifier(X_training, y_training):
     @return
 	clf : the classifier built in this function
     '''
-    ##         "INSERT YOUR CODE HERE"    
-    
     # Create Classifier
-    base_clf = svm.SVC(gamma='auto')
-    params = {'C' : [10, 1, 0.1, 0.01, 0.001]}
-    clf = GridSearchCV(base_clf, params, cv=5)
+    base_clf = svm.SVC(gamma='scale')
+    params = {'C' : [1000, 100, 10, 1, 0.1, 0.01, 0.001]}
+    clf = GridSearchCV(base_clf, params, cv=5, iid=False)
     #Set up the Training data
     clf.fit(X_training, y_training)
     
-    return clf
+    return clf.best_estimator_
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -158,17 +142,54 @@ def build_NeuralNetwork_classifier(X_training, y_training):
     @return
 	clf : the classifier built in this function
     '''
-   
-    clf = keras.Sequential()
-    clf.add(keras.layers.Dense(8))
-    clf.compile()
-    clf.fit(X_training, y_training)
+    #Create Classifier
+    base_clf = MLPClassifier(max_iter=1000)
+    params = {'hidden_layer_sizes' : [i*np.ones(3).astype(int) for i in range(5,30,5)]}
+    clf = GridSearchCV(base_clf, params, cv=5, iid=False)
+    #Set up the Training data
+    with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=ConvergenceWarning,
+                                    module="sklearn")
+            clf.fit(X_training, y_training)
+    
+    return clf.best_estimator_
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     ## AND OTHER FUNCTIONS TO COMPLETE THE EXPERIMENTS
     ##         "INSERT YOUR CODE HERE"    
-    raise NotImplementedError()
+    #raise NotImplementedError()
+def NN_PreProcessing(X_train, X_test):
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+    X_train_scaled = scaler.transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    return X_train_scaled, X_test_scaled
+
+def DecisionTree_Experiment(X_train, X_test, y_train, y_test):
+    clf = build_DecisionTree_classifier(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    l = clf.get_params()['min_samples_leaf']
+    print('Decision Tree:          {:2.1%} accurate with {:d} minimum samples per leaf'.format(acc,l))
+    
+def NearestNeighbours_Experiment(X_train, X_test, y_train, y_test):
+    clf = build_NearrestNeighbours_classifier(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    n = clf.get_params()['n_neighbors']
+    print('Nearest Neighbours:     {:2.1%} accurate with {:d} nearest neighbours considered'.format(acc,n))    
+    
+def SupportVectorMachine_Experiment(X_train, X_test, y_train, y_test):
+    clf = build_SupportVectorMachine_classifier(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    C = clf.get_params()['C']
+    print('Support Vector Machine: {:2.1%} accurate with {:d} as C value'.format(acc,C))
+
+def NeuralNetwork_Experiment(X_train, X_test, y_train, y_test):
+    X_trainS, X_testS = NN_PreProcessing(X_train, X_test)
+    clf = build_NeuralNetwork_classifier(X_trainS, y_train)
+    acc = clf.score(X_testS, y_test)
+    n = sum(clf.get_params()['hidden_layer_sizes'])
+    print('Neural Network:         {:2.1%} accurate with {:d} hidden neurons'.format(acc, n))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -184,24 +205,10 @@ if __name__ == "__main__":
     X, y = prepare_dataset('./medical_records(1).data')
     
     #Create test data
-    X_trainer, X_tester, y_trainer, y_tester = train_test_split(X, y, test_size=0.3)
-    
-    #Create classifiers
-    classifiers = [[build_DecisionTree_classifier, "Decision Tree"],
-                   [build_NearrestNeighbours_classifier, "Nearest Neighbours"],
-                   [build_SupportVectorMachine_classifier, "Support Vector Machine"]]
-    
-    #Output each classifier's values
-    for function, name in classifiers:
-        classifier = function(X_trainer, y_trainer)
-        #Generate report for training data
-        predict_training = classifier.predict(X_trainer)
-        print(name, "Classification Report:")
-        print(classification_report(y_trainer, predict_training))
-        # Generate report for test data
-        predict = classifier.predict(X_tester)
-        print(name, "Test Data Classification Report:")
-        print(classification_report(y_tester, predict))
-        
-    nnclf = build_NeuralNetwork_classifier(X_trainer, y_trainer)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+    DecisionTree_Experiment(X_train, X_test, y_train, y_test)
+    NearestNeighbours_Experiment(X_train, X_test, y_train, y_test)
+    SupportVectorMachine_Experiment(X_train, X_test, y_train, y_test)
+    NeuralNetwork_Experiment(X_train, X_test, y_train, y_test)
     
