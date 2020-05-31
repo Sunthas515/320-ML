@@ -16,6 +16,7 @@ You are welcome to use the pandas library if you know it.
 import numpy as np
 import pandas
 import warnings
+import time
 
 from sklearn import tree, neighbors, svm
 from sklearn.neural_network import MLPClassifier
@@ -120,7 +121,7 @@ def build_SupportVectorMachine_classifier(X_training, y_training):
     '''
     # Create Classifier
     base_clf = svm.SVC(gamma='scale')
-    params = {'C' : [1000, 100, 10, 1, 0.1, 0.01, 0.001]}
+    params = {'C' : [100000, 10000, 1000, 100, 10, 1]}
     clf = GridSearchCV(base_clf, params, cv=5, iid=False)
     #Set up the Training data
     clf.fit(X_training, y_training)
@@ -156,48 +157,125 @@ def build_NeuralNetwork_classifier(X_training, y_training):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    ## AND OTHER FUNCTIONS TO COMPLETE THE EXPERIMENTS
-    ##         "INSERT YOUR CODE HERE"    
-    #raise NotImplementedError()
-def NN_PreProcessing(X_train, X_test):
-    scaler = StandardScaler()
-    scaler.fit(X_train)
-    X_train_scaled = scaler.transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    return X_train_scaled, X_test_scaled
-
-def DecisionTree_Experiment(X_train, X_test, y_train, y_test):
+def DecisionTree_Experiment(X_train, X_test, y_train, y_test, verbose=False):
+    '''
+    Run experiment on Decision Tree Classifier
+    
+    @param
+    X_train: array of training data
+    X_test: array of testing data
+    y_train: array of training class labels
+    y_test: array of testing class labels
+    verbose: whether to print a single line summary or a full report to console
+    
+    @return
+    None
+    '''
+    tstart = time.time()
+    
     clf = build_DecisionTree_classifier(X_train, y_train)
     acc = clf.score(X_test, y_test)
-    l = clf.get_params()['min_samples_leaf']
-    print('Decision Tree:          {:2.1%} accurate with {:d} minimum samples per leaf'.format(acc,l))
+    S = clf.get_params()['min_samples_leaf']
     
-def NearestNeighbours_Experiment(X_train, X_test, y_train, y_test):
+    tend= time.time()
+    
+    if not verbose:
+        print('Decision Tree: {:2.1%} accurate, {:d} min samples/leaf, {:1.3f} seconds'.format(acc,S,tend-tstart))
+    else:
+        print('Decision Tree ({:d} min samples/leaf, {:f} seconds):'.format(S,tend-tstart))
+        print(classification_report(y_test,clf.predict(X_test)))
+    
+def NearestNeighbours_Experiment(X_train, X_test, y_train, y_test, verbose=False):
+    '''
+    Run experiment on Nearest Neighbours Classifier
+    
+    @param
+    X_train: array of training data
+    X_test: array of testing data
+    y_train: array of training class labels
+    y_test: array of testing class labels
+    verbose: whether to print a single line summary or a full report to console
+    
+    @return
+    None
+    '''
+    tstart = time.time()
+    
     clf = build_NearrestNeighbours_classifier(X_train, y_train)
     acc = clf.score(X_test, y_test)
     n = clf.get_params()['n_neighbors']
-    print('Nearest Neighbours:     {:2.1%} accurate with {:d} nearest neighbours considered'.format(acc,n))    
     
-def SupportVectorMachine_Experiment(X_train, X_test, y_train, y_test):
+    tend= time.time()
+    
+    if not verbose:
+        print('Nearest Neighbours: {:2.1%} accurate, {:d} nearest neighbours, {:1.3f} seconds'.format(acc,n,tend-tstart))    
+    else:
+        print('Nearest Neighbours ({:d} nearest neighbours, {:f} seconds):'.format(n,tend-tstart))
+        print(classification_report(y_test,clf.predict(X_test)))
+    
+def SupportVectorMachine_Experiment(X_train, X_test, y_train, y_test, verbose=False):
+    '''
+    Run experiment on Support Vector Machine Classifier
+    
+    @param
+    X_train: array of training data
+    X_test: array of testing data
+    y_train: array of training class labels
+    y_test: array of testing class labels
+    verbose: whether to print a single line summary or a full report to console
+    
+    @return
+    None
+    '''
+    tstart = time.time()
+    
     clf = build_SupportVectorMachine_classifier(X_train, y_train)
     acc = clf.score(X_test, y_test)
     C = clf.get_params()['C']
-    print('Support Vector Machine: {:2.1%} accurate with {:d} as C value'.format(acc,C))
+    
+    tend = time.time()
+    
+    if not verbose:
+        print('Support Vector Machine: {:2.1%} accurate, C = {:d}, {:1.3f} seconds'.format(acc,C,tend-tstart))
+    else:
+        print('Support Vector Machine (C = {:d}, {:f} seconds):'.format(C,tend-tstart))
+        print(classification_report(y_test,clf.predict(X_test)))
 
-def NeuralNetwork_Experiment(X_train, X_test, y_train, y_test):
-    X_trainS, X_testS = NN_PreProcessing(X_train, X_test)
-    clf = build_NeuralNetwork_classifier(X_trainS, y_train)
-    acc = clf.score(X_testS, y_test)
+def NeuralNetwork_Experiment(X_train, X_test, y_train, y_test, verbose=False):
+    '''
+    Run experiment on Neural Network Classifier
+    
+    @param
+    X_train: array of training data
+    X_test: array of testing data
+    y_train: array of training class labels
+    y_test: array of testing class labels
+    verbose: whether to print a single line summary or a full report to console
+    
+    @return
+    None
+    '''
+    tstart = time.time()
+    #additional data scaling for neural network
+    scaler = StandardScaler().fit(X_train)
+    X_train = scaler.transform(X_train)
+    X_test = scaler.transform(X_test)
+    
+    clf = build_NeuralNetwork_classifier(X_train, y_train)
+    acc = clf.score(X_test, y_test)
     n = sum(clf.get_params()['hidden_layer_sizes'])
-    print('Neural Network:         {:2.1%} accurate with {:d} hidden neurons'.format(acc, n))
+    
+    tend = time.time()
+        
+    if not verbose:
+        print('Neural Network: {:2.1%} accurate, {:d} hidden neurons, {:1.3f} seconds'.format(acc,n,tend-tstart))
+    else:
+        print('Neural Network ({:d} hidden neurons, {:f} seconds):'.format(n,tend-tstart))
+        print(classification_report(y_test,clf.predict(X_test)))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 if __name__ == "__main__":
-    # Write a main part that calls the different 
-    # functions to perform the required tasks and repeat your experiments.
-    # Call your functions here
-    ##         "INSERT YOUR CODE HERE"      
     #Print names
     print(my_team())
     
@@ -206,9 +284,17 @@ if __name__ == "__main__":
     
     #Create test data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-
-    DecisionTree_Experiment(X_train, X_test, y_train, y_test)
-    NearestNeighbours_Experiment(X_train, X_test, y_train, y_test)
-    SupportVectorMachine_Experiment(X_train, X_test, y_train, y_test)
-    NeuralNetwork_Experiment(X_train, X_test, y_train, y_test)
+    
+    '''
+    Comment or uncomment each line to run relevant experiment
+        verbose = False will print a single line summary for each run,
+        verbose = True will print a larger classification report
+        True or False values can be set for individual experiments if preferred
+    '''
+    verbose = False
+    
+    DecisionTree_Experiment(        X_train, X_test, y_train, y_test, verbose)
+    NearestNeighbours_Experiment(   X_train, X_test, y_train, y_test, verbose)
+    SupportVectorMachine_Experiment(X_train, X_test, y_train, y_test, verbose)
+    NeuralNetwork_Experiment(       X_train, X_test, y_train, y_test, verbose)
     
